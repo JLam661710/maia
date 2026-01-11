@@ -5,11 +5,12 @@ class SummaryAgent:
     def __init__(self, model_name=None):
         # Default to Flash for speed/cost, but allow override via Env or Init
         self.model_name = model_name or os.getenv("MODEL_SUMMARY", "gemini-2.5-flash")
+        self.reasoning_effort = os.getenv("REASONING_EFFORT_SUMMARY", None)
         self.system_prompt = self._load_system_prompt()
 
     def _load_system_prompt(self):
         try:
-            with open("SP_system_prompt_summary.md", "r", encoding="utf-8") as f:
+            with open("docs/prompts/SP_system_prompt_summary.md", "r", encoding="utf-8") as f:
                 return f.read()
         except FileNotFoundError:
             return "You are a helpful assistant that summarizes conversations."

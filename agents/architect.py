@@ -6,18 +6,23 @@ class ArchitectAgent:
     def __init__(self):
         # Read System Prompt
         try:
-            with open("SP_system_prompt_solution_architect.md", "r", encoding="utf-8") as f:
+            with open("docs/prompts/SP_system_prompt_solution_architect.md", "r", encoding="utf-8") as f:
                 self.system_prompt_template = f.read()
         except FileNotFoundError:
             self.system_prompt_template = "You are a solution architect."
 
-        # Get Model Config
-        self.model = os.getenv("MODEL_ARCHITECT", "gemini-3-pro-preview")
+        # Get Model Config (Dynamic Load)
+        # self.model = os.getenv("MODEL_ARCHITECT", "gemini-3-pro-preview")
+        self.reasoning_effort = os.getenv("REASONING_EFFORT_ARCHITECT", None)
+        pass
 
     def run(self, final_json_state):
         """
         Generates the final 4 deliverables based on the completed JSON state.
         """
+        # Reload model from env to support dynamic config changes
+        self.model = os.getenv("MODEL_ARCHITECT", "gemini-3-pro-preview")
+        self.reasoning_effort = os.getenv("REASONING_EFFORT_ARCHITECT", None)
         
         prompt = self.system_prompt_template
         
@@ -36,13 +41,13 @@ class ArchitectAgent:
             {"role": "user", "content": input_content}
         ]
 
-        with st.spinner(f"Architect ({self.model}) is drafting the final documents... This may take a minute."):
-            # High max_tokens because we expect a LONG output
-            response_text, tokens = llm_client.get_completion(
-                model=self.model,
-                messages=messages,
-                temperature=0.5,
-                max_tokens=8000 
-            )
+        # with st.spinner(f"Architect ({self.model}) is drafting the final documents... This may take a minute."):
+        # High max_tokens because we expect a LONG output
+        response_text, tokens = llm_client.get_completion(
+            model=self.model,
+            messages=messages,
+            temperature=0.5,
+            max_tokens=8000 
+        )
             
         return response_text

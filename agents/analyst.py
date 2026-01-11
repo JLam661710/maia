@@ -8,13 +8,14 @@ class AnalystAgent:
     def __init__(self):
         # Read System Prompt
         try:
-            with open("SP_system_prompt_backend_analyst.md", "r", encoding="utf-8") as f:
+            with open("docs/prompts/SP_system_prompt_backend_analyst.md", "r", encoding="utf-8") as f:
                 self.system_prompt_template = f.read()
         except FileNotFoundError:
             self.system_prompt_template = "You are a backend analyst."
 
         # Get Model Config
         self.model = os.getenv("MODEL_ANALYST", "gemini-3-pro-preview-thinking")
+        self.reasoning_effort = os.getenv("REASONING_EFFORT_ANALYST", None)
 
     def run(self, chat_history, current_json_state):
         """
@@ -44,10 +45,15 @@ class AnalystAgent:
         with st.spinner(f"Analyst ({self.model}) is thinking & updating state..."):
             # Note: response_format={"type": "json_object"} is NOT supported by Thinking models on some APIs
             # We rely on the prompt and post-processing.
+            kwargs = {}
+            if self.reasoning_effort and self.reasoning_effort.lower() != "none":
+                kwargs["reasoning_effort"] = self.reasoning_effort
+
             response_text, tokens = llm_client.get_completion(
                 model=self.model,
                 messages=messages,
                 temperature=0.2, # Lower temp for logic
+                **kwargs
             )
             
         # Parse JSON

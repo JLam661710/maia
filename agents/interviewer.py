@@ -6,13 +6,14 @@ class InterviewerAgent:
     def __init__(self):
         # Read System Prompt
         try:
-            with open("SP_system_prompt_interviewer.md", "r", encoding="utf-8") as f:
+            with open("docs/prompts/SP_system_prompt_interviewer.md", "r", encoding="utf-8") as f:
                 self.system_prompt_template = f.read()
         except FileNotFoundError:
             self.system_prompt_template = "You are a helpful interviewer."
 
         # Get Model Config
         self.model = os.getenv("MODEL_INTERVIEWER", "gemini-2.5-flash")
+        self.reasoning_effort = os.getenv("REASONING_EFFORT_INTERVIEWER", None)
 
     def run(self, history, system_notice, context_summary=None):
         """
@@ -49,10 +50,15 @@ class InterviewerAgent:
         messages.extend(history)
 
         with st.spinner(f"Interviewer ({self.model}) is typing..."):
+            kwargs = {}
+            if self.reasoning_effort and self.reasoning_effort.lower() != "none":
+                kwargs["reasoning_effort"] = self.reasoning_effort
+                
             response_text, tokens = llm_client.get_completion(
                 model=self.model,
                 messages=messages,
-                temperature=0.7
+                temperature=0.7,
+                **kwargs
             )
             
         return response_text

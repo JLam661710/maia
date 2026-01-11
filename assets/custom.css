@@ -1,0 +1,205 @@
+/* 
+    Maia 2.0 - Aurora Dawn Theme
+    Keywords: Ethereal, Lucid, Breathing, Intelligent
+*/
+
+/* --- GLOBAL FONTS --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* --- UNIVERSAL TEXT COLOR RESET --- */
+/* Force all text to be dark gray to prevent "white on white" issues */
+html, body, [class*="css"], .stMarkdown, .stText, p, div, span, label, li, h1, h2, h3, h4, h5, h6, input, textarea, select, button {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #374151 !important; /* Gray-700 */
+}
+
+/* Headings - Darker Gray */
+h1, h2, h3, h4, h5, h6, .stHeading {
+    color: #111827 !important; /* Gray-900 */
+    font-weight: 700 !important;
+    letter-spacing: -0.025em;
+}
+
+/* H1 Special Gradient */
+h1 {
+    background: linear-gradient(90deg, #4F46E5, #9333EA) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    padding-bottom: 0.2em;
+}
+
+/* Sidebar Title Reset (No Gradient) */
+section[data-testid="stSidebar"] h1 {
+    background: none !important;
+    -webkit-text-fill-color: #111827 !important;
+    color: #111827 !important;
+}
+
+/* --- BACKGROUND --- */
+.stApp {
+    background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 50%, #F5F3FF 100%);
+    background-attachment: fixed;
+}
+
+/* --- INPUTS & WIDGETS --- */
+/* Text Input, Text Area, Select Box */
+div[data-baseweb="input"] > div, 
+div[data-baseweb="textarea"] > div,
+div[data-baseweb="select"] > div {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(209, 213, 219, 0.8) !important; /* Gray-300 */
+    color: #111827 !important;
+}
+
+input, textarea {
+    color: #111827 !important;
+    background-color: transparent !important;
+}
+
+/* Placeholder Text */
+::placeholder {
+    color: #9CA3AF !important; /* Gray-400 */
+    opacity: 1;
+}
+
+/* Streamlit Selectbox/Dropdown Text */
+div[data-baseweb="select"] span {
+    color: #111827 !important;
+}
+
+/* --- SIDEBAR --- */
+section[data-testid="stSidebar"] {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02);
+}
+
+section[data-testid="stSidebar"] p, 
+section[data-testid="stSidebar"] span, 
+section[data-testid="stSidebar"] div {
+    color: #374151 !important;
+}
+
+/* --- BUTTONS --- */
+div.stButton > button {
+    border-radius: 9999px; /* Pill shape */
+    border: none;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    color: #374151 !important; /* Default button text */
+}
+
+/* Primary Button */
+div.stButton > button[kind="primary"] {
+    background: linear-gradient(90deg, #4F46E5, #7C3AED) !important;
+    color: white !important; /* Force white text on primary button */
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+div.stButton > button[kind="primary"]:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+    color: white !important;
+}
+
+/* Secondary Button */
+div.stButton > button[kind="secondary"] {
+    background: white !important;
+    border: 1px solid #E5E7EB !important;
+    color: #374151 !important;
+}
+
+div.stButton > button[kind="secondary"]:hover {
+    border-color: #D1D5DB !important;
+    background: #F9FAFB !important;
+    color: #111827 !important;
+}
+
+/* --- CARDS & CONTAINERS --- */
+.maia-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    margin-bottom: 20px;
+    transition: transform 0.2s ease;
+}
+
+.maia-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+}
+
+/* --- CHAT MESSAGES --- */
+.stChatMessage {
+    background-color: transparent;
+    border: none;
+}
+
+/* User Message */
+.stChatMessage[data-testid="user-message"] {
+    background-color: #F3F4F6; /* Gray-100 */
+    border-radius: 20px 20px 4px 20px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Assistant Message */
+.stChatMessage[data-testid="assistant-message"] {
+    background-color: #FFFFFF;
+    border-radius: 20px 20px 20px 4px;
+    padding: 1.5rem;
+    border-left: 4px solid #8B5CF6; /* Violet accent */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Message Text Color Specifics */
+.stChatMessage p, .stChatMessage div {
+    color: #374151 !important;
+}
+
+/* --- CHAT INPUT --- */
+.stChatInputContainer {
+    padding-bottom: 2rem;
+}
+
+div[data-testid="stChatInput"] {
+    border-radius: 24px !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Pulse animation for thinking state */
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+
+.thinking-pulse {
+    animation: pulse-glow 2s infinite;
+    padding: 10px 20px;
+    border-radius: 20px;
+    background: rgba(139, 92, 246, 0.1);
+    color: #7C3AED !important;
+    display: inline-block;
+    font-weight: 500;
+}

@@ -2,6 +2,7 @@ import os
 from openai import OpenAI
 import streamlit as st
 from dotenv import load_dotenv
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 # Load env vars
 load_dotenv()
@@ -17,7 +18,17 @@ class LLMClient:
         else:
             self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
 
-    def get_completion(self, model, messages, temperature=0.7, max_tokens=None, response_format=None):
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception_type(Exception),
+        reraise=True
+    )
+    def _call_api(self, params):
+        """Wrapped API call with retry logic"""
+        return self.client.chat.completions.create(**params)
+
+    def get_completion(self, model, messages, temperature=0.7, max_tokens=None, response_format=None, **kwargs):
         """
         Generic function to get completion from LLM.
         Tracks token usage in Streamlit session state.
@@ -40,7 +51,12 @@ class LLMClient:
             if response_format:
                 params["response_format"] = response_format
 
-            response = self.client.chat.completions.create(**params)
+            # Add any extra arguments (e.g. reasoning_effort)
+            if kwargs:
+                params.update(kwargs)
+
+            # Call with retry
+            response = self._call_api(params)
             
             content = response.choices[0].message.content
             
@@ -60,7 +76,7 @@ class LLMClient:
             return content, total_tokens
 
         except Exception as e:
-            st.error(f"LLM Call Failed ({model}): {str(e)}")
+            st.error(f"系统繁忙，请稍后再试 (System Busy): {str(e)}")
             return None, 0
 
 # Singleton instance
