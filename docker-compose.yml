@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8501:8501"
+    restart: always
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - INVITE_CODE=${INVITE_CODE}
+      - MODEL_INTERVIEWER=${MODEL_INTERVIEWER}
+      - MODEL_ANALYST=${MODEL_ANALYST}
+      - MODEL_ARCHITECT=${MODEL_ARCHITECT}
+      - MODEL_SUMMARY=${MODEL_SUMMARY}
