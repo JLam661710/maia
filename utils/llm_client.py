@@ -13,7 +13,7 @@ class LLMClient:
         self.base_url = os.getenv("OPENAI_BASE_URL")
         
         if not self.api_key:
-            st.error("⚠️ OPENAI_API_KEY is missing in .env file.")
+            print("⚠️ OPENAI_API_KEY is missing in environment variables.")
             self.client = None
         else:
             self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
