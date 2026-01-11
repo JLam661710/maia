@@ -4,22 +4,18 @@ FROM python:3.11-slim
 # 设置工作目录
 WORKDIR /app
 
-# 设置环境变量，防止 Python 生成 .pyc 文件和缓冲输出
+# 设置环境变量
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# 安装系统依赖 (如果需要)
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    software-properties-common \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+# 更新 pip
+RUN pip install --upgrade pip
 
 # 复制依赖文件
 COPY requirements.txt .
 
 # 安装 Python 依赖
+# --no-cache-dir 减小镜像体积
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制项目代码
@@ -29,5 +25,5 @@ COPY . .
 EXPOSE 8501
 
 # 启动命令
-HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+# 注意：移除了 healthcheck 中的 curl 依赖，改用 streamlit 原生配置
 ENTRYPOINT ["streamlit", "run", "main.py", "--server.port=8501", "--server.address=0.0.0.0"]
