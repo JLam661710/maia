@@ -51,12 +51,55 @@ class SummaryAgent:
             {"role": "user", "content": user_prompt}
         ]
 
+        def _env_float(key: str, default):
+            v = os.getenv(key)
+            if v is None or v == "":
+                return default
+            try:
+                return float(v)
+            except Exception:
+                return default
+
+        def _env_int(key: str, default):
+            v = os.getenv(key)
+            if v is None or v == "":
+                return default
+            try:
+                return int(v)
+            except Exception:
+                return default
+
         # Call LLM
         try:
+            kwargs = {}
+            if self.reasoning_effort and self.reasoning_effort.lower() != "none":
+                kwargs["reasoning_effort"] = self.reasoning_effort
+
+            top_p = _env_float("TOP_P_SUMMARY", None)
+            if top_p is not None:
+                kwargs["top_p"] = top_p
+
+            presence_penalty = _env_float("PRESENCE_PENALTY_SUMMARY", None)
+            if presence_penalty is not None:
+                kwargs["presence_penalty"] = presence_penalty
+
+            frequency_penalty = _env_float("FREQUENCY_PENALTY_SUMMARY", None)
+            if frequency_penalty is not None:
+                kwargs["frequency_penalty"] = frequency_penalty
+
+            seed = _env_int("SEED_SUMMARY", None)
+            if seed is not None:
+                kwargs["seed"] = seed
+
+            max_tokens = _env_int("MAX_TOKENS_SUMMARY", None)
+            temperature = _env_float("TEMPERATURE_SUMMARY", 0.3) or 0.3
+
             response, _ = llm_client.get_completion(
                 model=self.model_name,
                 messages=messages,
-                temperature=0.3 # Low temperature for factual consistency
+                temperature=temperature,
+                max_tokens=max_tokens,
+                **kwargs
             )
             if response:
                 return response.strip()

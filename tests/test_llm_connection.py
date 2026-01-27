@@ -2,6 +2,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from openai import OpenAI
+import unittest
 
 # 1. Load environment variables
 load_dotenv()
@@ -21,7 +22,7 @@ print("==================================================")
 print("  API Connection Test (Dual-Agent / Triple-Agent) ")
 print("==================================================")
 print(f"Base URL: {base_url}")
-print(f"API Key:  {api_key[:8]}...{api_key[-4:] if api_key else 'None'}")
+print(f"API Key:  {f'{api_key[:8]}...{api_key[-4:]}' if api_key else 'None'}")
 print("--------------------------------------------------")
 print(f"Target Models:")
 print(f"1. Interviewer: {model_interviewer}")
@@ -29,18 +30,16 @@ print(f"2. Analyst:     {model_analyst}")
 print(f"3. Architect:   {model_architect}")
 print("==================================================\n")
 
-if not api_key or "your-apiyi-key-here" in api_key:
-    print("❌ ERROR: Please set your valid OPENAI_API_KEY in .env file first!")
-    sys.exit(1)
+def _can_run_connection_test() -> bool:
+    if os.getenv("RUN_LLM_CONNECTION_TESTS") != "1":
+        return False
+    if not api_key or "your-apiyi-key-here" in api_key:
+        return False
+    if not base_url:
+        return False
+    return True
 
-# 3. Initialize Client
-try:
-    client = OpenAI(api_key=api_key, base_url=base_url)
-except Exception as e:
-    print(f"❌ ERROR: Failed to initialize OpenAI client: {e}")
-    sys.exit(1)
-
-def test_model(role_name, model_name):
+def test_model(client: OpenAI, role_name: str, model_name: str) -> bool:
     print(f"🔄 Testing [{role_name}] using model: {model_name}...")
     # Try to call the model
     try:
@@ -67,24 +66,22 @@ def test_model(role_name, model_name):
         print(f"❌ FAILED: {role_name} error: {e}")
         return False
 
-# 4. Run Tests
-success_count = 0
-total_tests = 3
+class TestLLMConnection(unittest.TestCase):
+    @unittest.skipUnless(
+        _can_run_connection_test(),
+        "Set RUN_LLM_CONNECTION_TESTS=1 and configure OPENAI_API_KEY/OPENAI_BASE_URL to run.",
+    )
+    def test_models(self):
+        client = OpenAI(api_key=api_key, base_url=base_url)
+        self.assertTrue(test_model(client, "Interviewer", model_interviewer))
+        print("--------------------------------------------------")
+        self.assertTrue(test_model(client, "Analyst", model_analyst))
+        print("--------------------------------------------------")
+        self.assertTrue(test_model(client, "Architect", model_architect))
 
-if test_model("Interviewer", model_interviewer):
-    success_count += 1
-print("--------------------------------------------------")
 
-if test_model("Analyst", model_analyst):
-    success_count += 1
-print("--------------------------------------------------")
-
-if test_model("Architect", model_architect):
-    success_count += 1
-
-print("\n==================================================")
-if success_count == total_tests:
-    print("🎉 All systems operational! We are ready to code.")
-else:
-    print(f"⚠️  Warning: Only {success_count}/{total_tests} models passed. Please check configuration.")
-print("==================================================")
+if __name__ == "__main__":
+    if not _can_run_connection_test():
+        print("❌ ERROR: Missing config. Set RUN_LLM_CONNECTION_TESTS=1 and valid OPENAI_API_KEY/OPENAI_BASE_URL.")
+        sys.exit(1)
+    unittest.main()

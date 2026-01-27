@@ -5,3 +5,4 @@ pydantic>=2.0.0
 watchdog>=3.0.0
 supabase>=2.0.0
 tenacity>=8.2.0
+posthog>=3.0.0

@@ -1,0 +1,84 @@
+{
+  "schema_version": "tool_catalog.v1",
+  "updated_at": null,
+  "policies": {
+    "prefer_recommended": true,
+    "forbid_deprecated": true,
+    "allow_unknown_with_admin_flag": true
+  },
+  "categories": [
+    {
+      "id": "mvp_shell",
+      "name": "MVP 外壳工具",
+      "items": [
+        { "id": "cursor", "name": "Cursor", "type": "ai_ide", "status": "allowed" },
+        { "id": "lovable", "name": "Lovable", "type": "app_builder", "status": "allowed" },
+        { "id": "enter_pro", "name": "enter.pro", "type": "app_builder", "status": "allowed" },
+        { "id": "stitch", "name": "Stitch", "type": "app_builder", "status": "allowed" },
+        { "id": "trae", "name": "Trae", "type": "ai_ide", "status": "allowed" },
+        { "id": "google_ai_studio", "name": "Google AI Studio", "type": "ai_studio", "status": "allowed" },
+        { "id": "antigravity", "name": "Antigravity", "type": "dev_tool", "status": "allowed" },
+        { "id": "claude_code", "name": "Claude Code", "type": "ai_cli", "status": "allowed" },
+        { "id": "codex", "name": "Codex", "type": "ai_cli", "status": "allowed" }
+      ]
+    },
+    {
+      "id": "versioning",
+      "name": "版本管理",
+      "items": [
+        { "id": "git", "name": "Git", "type": "vcs", "status": "recommended" },
+        { "id": "github", "name": "GitHub", "type": "vcs_host", "status": "recommended" }
+      ]
+    },
+    {
+      "id": "database",
+      "name": "数据与存储",
+      "items": [
+        { "id": "supabase", "name": "Supabase", "type": "db_baas", "status": "recommended" },
+        { "id": "cloudflare", "name": "Cloudflare", "type": "cloud_platform", "status": "allowed" },
+        { "id": "aliyun", "name": "阿里云", "type": "cloud_platform", "status": "allowed" },
+        { "id": "volcengine", "name": "火山引擎", "type": "cloud_platform", "status": "allowed" }
+      ]
+    },
+    {
+      "id": "deployment_distribution",
+      "name": "部署与分发",
+      "items": [
+        { "id": "vercel", "name": "Vercel", "type": "deployment", "status": "recommended" },
+        { "id": "github_pages", "name": "GitHub Pages", "type": "deployment", "status": "allowed" },
+        { "id": "cloudflare_pages", "name": "Cloudflare Pages", "type": "deployment", "status": "allowed" },
+        { "id": "zeabur", "name": "Zeabur", "type": "deployment", "status": "allowed" },
+        { "id": "yourware", "name": "Yourware", "type": "deployment", "status": "allowed" },
+        { "id": "enter_pro_deploy", "name": "enter.pro", "type": "deployment", "status": "allowed" }
+      ]
+    },
+    {
+      "id": "analytics",
+      "name": "埋点与分析",
+      "items": [
+        { "id": "posthog", "name": "PostHog", "type": "analytics", "status": "recommended" },
+        { "id": "google_analytics", "name": "Google Analytics", "type": "analytics", "status": "allowed" }
+      ]
+    },
+    {
+      "id": "seo",
+      "name": "SEO 与收录",
+      "items": [
+        { "id": "google_search_console", "name": "Google Search Console", "type": "seo", "status": "recommended" },
+        { "id": "baidu_zhanzhang", "name": "百度站长平台", "type": "seo", "status": "allowed" },
+        { "id": "bing_webmaster", "name": "Bing Webmaster Tools", "type": "seo", "status": "allowed" }
+      ]
+    },
+    {
+      "id": "payment",
+      "name": "支付与收款",
+      "items": [
+        { "id": "alipay", "name": "支付宝", "type": "payment", "status": "allowed" },
+        { "id": "wechat_pay", "name": "微信支付", "type": "payment", "status": "allowed" },
+        { "id": "stripe", "name": "Stripe", "type": "payment", "status": "recommended" },
+        { "id": "paypal", "name": "PayPal", "type": "payment", "status": "allowed" }
+      ]
+    }
+  ]
+}
+

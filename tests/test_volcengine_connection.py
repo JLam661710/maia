@@ -3,8 +3,8 @@ from openai import OpenAI
 import sys
 
 # Volcengine Configuration
-API_KEY = "a10addaa-4bf9-43f2-a19c-f8603eafd38e"
-BASE_URL = "https://ark.cn-beijing.volces.com/api/v3"
+API_KEY = os.getenv("OPENAI_API_KEY") or os.getenv("VOLCENGINE_API_KEY")
+BASE_URL = os.getenv("OPENAI_BASE_URL") or os.getenv("VOLCENGINE_BASE_URL") or "https://ark.cn-beijing.volces.com/api/v3"
 
 models_to_test = {
     "Interviewer": "doubao-1-5-pro-32k-250115",
@@ -15,6 +15,9 @@ models_to_test = {
 
 def test_model(role, model_id):
     print(f"Testing {role} ({model_id})...", end=" ", flush=True)
+    if not API_KEY:
+        print("⏭️ Skipped (missing API key)")
+        return True
     client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
     try:
         response = client.chat.completions.create(
@@ -34,6 +37,9 @@ def test_model(role, model_id):
 
 if __name__ == "__main__":
     print(f"🔌 Testing Volcengine Connection...\nBase URL: {BASE_URL}\n")
+    if not API_KEY:
+        print("⚠️ Missing OPENAI_API_KEY/VOLCENGINE_API_KEY. Skipping connection test.")
+        sys.exit(0)
     all_passed = True
     for role, model_id in models_to_test.items():
         if not test_model(role, model_id):

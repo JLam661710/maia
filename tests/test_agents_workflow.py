@@ -13,6 +13,7 @@ from agents.interviewer import InterviewerAgent
 from agents.analyst import AnalystAgent
 from agents.architect import ArchitectAgent
 from agents.summary import SummaryAgent
+from agents.judge import JudgeAgent
 
 def test_workflow():
     print("🚀 Starting Agent Workflow Test (Doubao 1.8 Config)...")
@@ -20,7 +21,7 @@ def test_workflow():
     print("-" * 50)
 
     # 1. Test Interviewer
-    print("\n[1/4] Testing Interviewer Agent...")
+    print("\n[1/5] Testing Interviewer Agent...")
     try:
         interviewer = InterviewerAgent()
         history = [{"role": "user", "content": "我想做一个AI驱动的个人助理应用。"}]
@@ -41,7 +42,7 @@ def test_workflow():
         return
 
     # 2. Test Summary
-    print("\n[2/4] Testing Summary Agent...")
+    print("\n[2/5] Testing Summary Agent...")
     try:
         summary_agent = SummaryAgent()
         current_summary = "User wants an AI assistant."
@@ -63,7 +64,7 @@ def test_workflow():
         print(f"❌ Summary Error: {e}")
 
     # 3. Test Analyst
-    print("\n[3/4] Testing Analyst Agent...")
+    print("\n[3/5] Testing Analyst Agent...")
     try:
         analyst = AnalystAgent()
         current_state = {
@@ -89,8 +90,27 @@ def test_workflow():
         print(f"❌ Analyst Error: {e}")
         return
 
-    # 4. Test Architect
-    print("\n[4/4] Testing Architect Agent...")
+    # 4. Test Judge
+    print("\n[4/5] Testing Judge Agent...")
+    try:
+        judge = JudgeAgent()
+        start_time = time.time()
+        judge_result = judge.run(
+            chat_history=history + [{"role": "assistant", "content": response}],
+            current_json_state=final_state if isinstance(final_state, dict) else {},
+        )
+        duration = time.time() - start_time
+        if judge_result:
+            print(f"✅ Judge Success ({duration:.2f}s)")
+            preview = str(judge_result)[:120].replace("\n", " ")
+            print(f"Judge Preview: {preview}...")
+        else:
+            print("⚠️  Judge returned no result (may be due to configuration).")
+    except Exception as e:
+        print(f"❌ Judge Error: {e}")
+
+    # 5. Test Architect
+    print("\n[5/5] Testing Architect Agent...")
     try:
         architect = ArchitectAgent()
         # Use a dummy finalized state for testing

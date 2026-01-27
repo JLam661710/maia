@@ -1,6 +1,5 @@
 import streamlit as st
 import os
-import re
 
 # Page Config
 st.set_page_config(
@@ -84,15 +83,25 @@ def main():
         if st.button("🚀 加载 Doubao 预设 (Default)", use_container_width=True):
             updates = {
                 "OPENAI_BASE_URL": "https://ark.cn-beijing.volces.com/api/v3",
-                "OPENAI_API_KEY": "a10addaa-4bf9-43f2-a19c-f8603eafd38e",
+                "OPENAI_API_KEY": "",
                 "MODEL_INTERVIEWER": "doubao-seed-1-8-251228",
                 "MODEL_ANALYST": "doubao-seed-1-8-251228",
                 "MODEL_ARCHITECT": "doubao-seed-1-8-251228",
                 "MODEL_SUMMARY": "doubao-seed-1-8-251228",
+                "MODEL_JUDGE": "doubao-seed-1-8-251228",
                 "REASONING_EFFORT_INTERVIEWER": "minimal",
                 "REASONING_EFFORT_ANALYST": "medium",
                 "REASONING_EFFORT_ARCHITECT": "high",
-                "REASONING_EFFORT_SUMMARY": "minimal"
+                "REASONING_EFFORT_SUMMARY": "minimal",
+                "REASONING_EFFORT_JUDGE": "medium",
+                "TEMPERATURE_INTERVIEWER": "0.7",
+                "TEMPERATURE_ANALYST": "0.2",
+                "TEMPERATURE_ARCHITECT": "0.5",
+                "TEMPERATURE_SUMMARY": "0.3",
+                "TEMPERATURE_JUDGE": "0.2",
+                "MAX_TOKENS_ARCHITECT": "12000",
+                "RESPONSE_FORMAT_ANALYST": "json_object",
+                "RESPONSE_FORMAT_JUDGE": "json_object",
             }
             save_env_file(ENV_FILE, updates, raw_lines)
             st.success("已加载 Doubao 预设！")
@@ -102,15 +111,17 @@ def main():
         if st.button("🌐 加载 APIYi 预设 (Legacy)", use_container_width=True):
             updates = {
                 "OPENAI_BASE_URL": "https://api.apiyi.com/v1",
-                "OPENAI_API_KEY": "sk-amgIcOq6KVO0h9zI8a3e53D420074f4c998c6065513aBaF8",
+                "OPENAI_API_KEY": "",
                 "MODEL_INTERVIEWER": "claude-3-7-sonnet-20250219",
                 "MODEL_ANALYST": "gemini-3-pro-preview-thinking",
                 "MODEL_ARCHITECT": "gemini-3-pro-preview",
                 "MODEL_SUMMARY": "gemini-2.5-flash",
+                "MODEL_JUDGE": "gemini-3-pro-preview-thinking",
                 "REASONING_EFFORT_INTERVIEWER": "None",
                 "REASONING_EFFORT_ANALYST": "None",
                 "REASONING_EFFORT_ARCHITECT": "None",
-                "REASONING_EFFORT_SUMMARY": "None"
+                "REASONING_EFFORT_SUMMARY": "None",
+                "REASONING_EFFORT_JUDGE": "None",
             }
             save_env_file(ENV_FILE, updates, raw_lines)
             st.success("已加载 APIYi 预设！")
@@ -139,7 +150,7 @@ def main():
         st.subheader("2. Agent 模型选择")
         st.caption("输入模型 ID (例如: doubao-seed-1-8-251228)")
         
-        col_m1, col_m2 = st.columns(2)
+        col_m1, col_m2, col_m3 = st.columns(3)
         with col_m1:
             model_interviewer = st.text_input("Interviewer Model", value=current_config.get("MODEL_INTERVIEWER", "doubao-seed-1-8-251228"))
             model_analyst = st.text_input("Analyst Model", value=current_config.get("MODEL_ANALYST", "doubao-seed-1-8-251228"))
@@ -148,12 +159,15 @@ def main():
             model_architect = st.text_input("Architect Model", value=current_config.get("MODEL_ARCHITECT", "doubao-seed-1-8-251228"))
             model_summary = st.text_input("Summary Model", value=current_config.get("MODEL_SUMMARY", "doubao-seed-1-8-251228"))
 
+        with col_m3:
+            model_judge = st.text_input("Judge Model", value=current_config.get("MODEL_JUDGE", "doubao-seed-1-8-251228"))
+
         st.subheader("3. 推理强度配置 (Reasoning Effort)")
         st.caption("仅部分模型支持 (如 o1, o3, doubao-seed)")
         
         reasoning_options = ["None", "minimal", "low", "medium", "high"]
         
-        col_r1, col_r2 = st.columns(2)
+        col_r1, col_r2, col_r3 = st.columns(3)
         
         def get_index(key, options):
             val = current_config.get(key, "None")
@@ -185,6 +199,45 @@ def main():
                 index=get_index("REASONING_EFFORT_ARCHITECT", reasoning_options)
             )
 
+        with col_r3:
+            re_judge = st.selectbox(
+                "Judge Reasoning Effort",
+                options=reasoning_options,
+                index=get_index("REASONING_EFFORT_JUDGE", reasoning_options)
+            )
+
+        st.subheader("4. 采样与输出参数 (可选)")
+        col_p_a, col_p_b, col_p_c = st.columns(3)
+        with col_p_a:
+            temperature_interviewer = st.text_input("TEMPERATURE_INTERVIEWER", value=current_config.get("TEMPERATURE_INTERVIEWER", ""))
+            max_tokens_interviewer = st.text_input("MAX_TOKENS_INTERVIEWER", value=current_config.get("MAX_TOKENS_INTERVIEWER", ""))
+            top_p_interviewer = st.text_input("TOP_P_INTERVIEWER", value=current_config.get("TOP_P_INTERVIEWER", ""))
+
+        with col_p_b:
+            temperature_analyst = st.text_input("TEMPERATURE_ANALYST", value=current_config.get("TEMPERATURE_ANALYST", ""))
+            max_tokens_analyst = st.text_input("MAX_TOKENS_ANALYST", value=current_config.get("MAX_TOKENS_ANALYST", ""))
+            top_p_analyst = st.text_input("TOP_P_ANALYST", value=current_config.get("TOP_P_ANALYST", ""))
+
+        with col_p_c:
+            temperature_architect = st.text_input("TEMPERATURE_ARCHITECT", value=current_config.get("TEMPERATURE_ARCHITECT", ""))
+            max_tokens_architect = st.text_input("MAX_TOKENS_ARCHITECT", value=current_config.get("MAX_TOKENS_ARCHITECT", ""))
+            top_p_architect = st.text_input("TOP_P_ARCHITECT", value=current_config.get("TOP_P_ARCHITECT", ""))
+
+        col_p_d, col_p_e, col_p_f = st.columns(3)
+        with col_p_d:
+            temperature_summary = st.text_input("TEMPERATURE_SUMMARY", value=current_config.get("TEMPERATURE_SUMMARY", ""))
+            max_tokens_summary = st.text_input("MAX_TOKENS_SUMMARY", value=current_config.get("MAX_TOKENS_SUMMARY", ""))
+            top_p_summary = st.text_input("TOP_P_SUMMARY", value=current_config.get("TOP_P_SUMMARY", ""))
+
+        with col_p_e:
+            temperature_judge = st.text_input("TEMPERATURE_JUDGE", value=current_config.get("TEMPERATURE_JUDGE", ""))
+            max_tokens_judge = st.text_input("MAX_TOKENS_JUDGE", value=current_config.get("MAX_TOKENS_JUDGE", ""))
+            top_p_judge = st.text_input("TOP_P_JUDGE", value=current_config.get("TOP_P_JUDGE", ""))
+
+        with col_p_f:
+            response_format_analyst = st.text_input("RESPONSE_FORMAT_ANALYST", value=current_config.get("RESPONSE_FORMAT_ANALYST", ""))
+            response_format_judge = st.text_input("RESPONSE_FORMAT_JUDGE", value=current_config.get("RESPONSE_FORMAT_JUDGE", ""))
+
         st.markdown("---")
         submitted = st.form_submit_button("💾 保存配置", use_container_width=True)
 
@@ -196,8 +249,29 @@ def main():
                 "MODEL_ANALYST": model_analyst,
                 "MODEL_ARCHITECT": model_architect,
                 "MODEL_SUMMARY": model_summary,
+                "MODEL_JUDGE": model_judge,
                 "REASONING_EFFORT_INTERVIEWER": re_interviewer,
-                "REASONING_EFFORT_SUMMARY": re_summary
+                "REASONING_EFFORT_ANALYST": re_analyst,
+                "REASONING_EFFORT_ARCHITECT": re_architect,
+                "REASONING_EFFORT_SUMMARY": re_summary,
+                "REASONING_EFFORT_JUDGE": re_judge,
+                "TEMPERATURE_INTERVIEWER": temperature_interviewer,
+                "TEMPERATURE_ANALYST": temperature_analyst,
+                "TEMPERATURE_ARCHITECT": temperature_architect,
+                "TEMPERATURE_SUMMARY": temperature_summary,
+                "TEMPERATURE_JUDGE": temperature_judge,
+                "TOP_P_INTERVIEWER": top_p_interviewer,
+                "TOP_P_ANALYST": top_p_analyst,
+                "TOP_P_ARCHITECT": top_p_architect,
+                "TOP_P_SUMMARY": top_p_summary,
+                "TOP_P_JUDGE": top_p_judge,
+                "MAX_TOKENS_INTERVIEWER": max_tokens_interviewer,
+                "MAX_TOKENS_ANALYST": max_tokens_analyst,
+                "MAX_TOKENS_ARCHITECT": max_tokens_architect,
+                "MAX_TOKENS_SUMMARY": max_tokens_summary,
+                "MAX_TOKENS_JUDGE": max_tokens_judge,
+                "RESPONSE_FORMAT_ANALYST": response_format_analyst,
+                "RESPONSE_FORMAT_JUDGE": response_format_judge,
             }
             
             # Filter out "None" values if needed, or save them as empty string/None

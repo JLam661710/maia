@@ -108,6 +108,49 @@ class DBClient:
             
         return messages, json_state
 
+    def get_admin_config_latest(self, config_key):
+        if not self.client or not config_key:
+            return None
+        try:
+            res = (
+                self.client.table("admin_configs")
+                .select("*")
+                .eq("config_key", config_key)
+                .order("updated_at", desc=True)
+                .limit(1)
+                .execute()
+            )
+            if res.data:
+                return res.data[0]
+        except Exception as e:
+            print(f"Error fetching admin config: {e}")
+        return None
+
+    def upsert_admin_config(self, config_key, content_text, content_json=None, updated_by=None):
+        if not self.client or not config_key or content_text is None:
+            return None
+        try:
+            latest = self.get_admin_config_latest(config_key)
+            next_version = 1
+            if latest and isinstance(latest.get("version"), int):
+                next_version = latest["version"] + 1
+
+            payload = {
+                "config_key": config_key,
+                "content_text": content_text,
+                "version": next_version,
+                "updated_by": updated_by,
+            }
+            if content_json is not None:
+                payload["content_json"] = content_json
+
+            res = self.client.table("admin_configs").insert(payload).execute()
+            if res.data:
+                return res.data[0]
+        except Exception as e:
+            print(f"Error upserting admin config: {e}")
+        return None
+
     # ==========================================
     # Data Saving Methods
     # ==========================================
@@ -142,6 +185,43 @@ class DBClient:
             }).execute()
         except Exception as e:
             print(f"Error saving deliverable: {e}")
+
+    def save_deliverable_bundle(self, session_id, content, meta_info=None):
+        if not self.client or not session_id: return
+        payload = {"session_id": session_id, "content": content}
+        if meta_info is not None:
+            payload["meta_info"] = meta_info
+        try:
+            self.client.table("deliverables").insert(payload).execute()
+        except Exception:
+            try:
+                self.client.table("deliverables").insert({"session_id": session_id, "content": content}).execute()
+            except Exception as e:
+                print(f"Error saving deliverable bundle: {e}")
+
+    def save_deliverable_documents(self, session_id, documents):
+        if not self.client or not session_id: return
+        if not documents or not isinstance(documents, list):
+            return
+        for i, d in enumerate(documents):
+            if not isinstance(d, dict):
+                continue
+            file_name = d.get("file_name")
+            content = d.get("content")
+            if not file_name or not content:
+                continue
+            row = {
+                "session_id": session_id,
+                "file_name": file_name,
+                "content": content,
+                "doc_type": d.get("doc_type"),
+                "sort_order": d.get("sort_order", i),
+                "meta_info": d.get("meta_info"),
+            }
+            try:
+                self.client.table("deliverable_documents").insert(row).execute()
+            except Exception as e:
+                print(f"Error saving deliverable document: {e}")
     
     def update_session_status(self, session_id, status, summary=None, archived_count=None):
         if not self.client or not session_id: return

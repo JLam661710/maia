@@ -25,7 +25,6 @@ COPY . .
 EXPOSE 8501
 
 # 设置 Streamlit 配置环境变量
-ENV STREAMLIT_SERVER_PORT=8501
 ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
 ENV STREAMLIT_SERVER_HEADLESS=true
 ENV STREAMLIT_SERVER_ENABLE_CORS=false
@@ -35,4 +34,4 @@ ENV STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
 
 # 启动命令
 # 注意：移除了 healthcheck 中的 curl 依赖，改用 streamlit 原生配置
-ENTRYPOINT ["streamlit", "run", "main.py"]
+ENTRYPOINT ["sh", "-c", "streamlit run main.py --server.address 0.0.0.0 --server.port ${PORT:-8501}"]
