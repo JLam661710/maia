@@ -203,3 +203,7 @@ div[data-testid="stChatInput"] {
     display: inline-block;
     font-weight: 500;
 }
+
+header, [data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"], [data-testid="stDeployButton"], #MainMenu, footer {
+    display: none !important;
+}

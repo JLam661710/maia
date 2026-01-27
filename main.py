@@ -20,7 +20,7 @@ from agents.summary import SummaryAgent
 from agents.judge import JudgeAgent
 
 # Page Config
-st.set_page_config(page_title="Maia", page_icon="🤖", layout="wide")
+st.set_page_config(page_title="Maia", page_icon="🤖", layout="wide", initial_sidebar_state="collapsed")
 
 # Load Custom CSS
 def load_css():
@@ -135,50 +135,43 @@ def text(key, **kwargs) -> str:
     val = t(key, lang=st.session_state.lang, **kwargs)
     return str(val) if val is not None else ""
 
-# Global Sidebar for Language
-with st.sidebar:
-    st.markdown(f"### 🌐 {text('sidebar_lang')}")
-    lang_code = st.radio(
-        "Language", 
-        options=["zh", "en"], 
-        format_func=lambda x: "中文" if x == "zh" else "English",
-        index=0 if st.session_state.lang == "zh" else 1,
-        label_visibility="collapsed"
-    )
-    if lang_code != st.session_state.lang:
-        st.session_state.lang = lang_code
-        st.rerun()
+def render_top_controls(show_back: bool = False):
+    col_left, _, col_right = st.columns([1.2, 6, 1.2])
+
+    with col_left:
+        if show_back:
+            if st.session_state.page_mode == "AUTH":
+                if st.button(text("btn_back_home"), key="top_back_home", type="secondary"):
+                    st.session_state.page_mode = "LANDING"
+                    st.rerun()
+            elif st.session_state.page_mode == "CHAT":
+                if st.session_state.user_info:
+                    if st.button(text("btn_back_dash"), key="top_back_dash", type="secondary"):
+                        st.session_state.page_mode = "DASHBOARD"
+                        st.rerun()
+                else:
+                    if st.button(text("btn_exit_guest"), key="top_back_landing", type="secondary"):
+                        st.session_state.page_mode = "LANDING"
+                        st.rerun()
+
+    with col_right:
+        toggle_label = "English" if st.session_state.lang == "zh" else "中文"
+        if st.button(toggle_label, key="top_lang_toggle", type="secondary"):
+            st.session_state.lang = "en" if st.session_state.lang == "zh" else "zh"
+            st.rerun()
 
 # ==========================================
 # 1. LANDING PAGE
 # ==========================================
 def render_landing():
     analytics.track_event("guest", "page_view", {"page": "landing"})
+    render_top_controls(show_back=False)
     st.markdown(f"<div class='animate-fade-in'>", unsafe_allow_html=True)
     st.markdown(f"<h1 style='text-align: center; font-size: 3.5rem; margin-bottom: 0.5rem;'>{text('landing_title')}</h1>", unsafe_allow_html=True)
     st.markdown(f"<p class='sub-header'>{text('landing_subtitle')}<br><span style='font-size: 0.9em; opacity: 0.8'>{text('landing_subtitle_desc')}</span></p>", unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2, gap="large")
-    
-    with col1:
-        st.markdown(f"""
-        <div class='maia-card'>
-            <h3>{text('mode_guest_title')}</h3>
-            <p>{text('mode_guest_desc')}</p>
-            <p style='color: #F59E0B; font-size: 0.9em;'>{text('mode_guest_warn')}</p>
-        </div>
-        """, unsafe_allow_html=True)
-        # GUEST MODE DISABLED FOR LAUNCH
-        # if st.button(text('btn_start_guest'), use_container_width=True, type="primary"):
-        #     st.session_state.user_info = None
-        #     # Create Guest Session
-        #     sid = db_client.create_session(user_id=None)
-        #     st.session_state.session_id = sid
-        #     st.session_state.page_mode = "CHAT"
-        #     st.rerun()
-        st.info("游客模式已暂停开放 (Guest Mode Disabled)")
-
-    with col2:
+    col_center = st.columns([1, 2, 1])
+    with col_center[1]:
         st.markdown(f"""
         <div class='maia-card'>
             <h3>{text('mode_member_title')}</h3>
@@ -186,7 +179,7 @@ def render_landing():
             <p style='color: #10B981; font-size: 0.9em;'>{text('mode_member_feat')}</p>
         </div>
         """, unsafe_allow_html=True)
-        if st.button(text('btn_login_reg'), use_container_width=True):
+        if st.button(text('btn_login_reg'), use_container_width=True, type="primary"):
             st.session_state.page_mode = "AUTH"
             st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
@@ -195,15 +188,12 @@ def render_landing():
 # 2. AUTH PAGE
 # ==========================================
 def render_auth():
+    render_top_controls(show_back=True)
     st.markdown("<div class='animate-fade-in'>", unsafe_allow_html=True)
     st.markdown(f"<h2 style='text-align: center;'>{text('auth_title')}</h2>", unsafe_allow_html=True)
     
     col_center = st.columns([1, 2, 1])
     with col_center[1]:
-        if st.button(text('btn_back_home')):
-            st.session_state.page_mode = "LANDING"
-            st.rerun()
-
         st.markdown("<div class='maia-card'>", unsafe_allow_html=True)
         tab1, tab2 = st.tabs([text('tab_login'), text('tab_register')])
         
@@ -251,6 +241,7 @@ def render_auth():
 # 3. DASHBOARD PAGE
 # ==========================================
 def render_dashboard():
+    render_top_controls(show_back=False)
     user = st.session_state.user_info
     nickname = user.user_metadata.get('nickname', 'User') if user else 'User'
     
@@ -318,31 +309,17 @@ def render_dashboard():
 # 4. CHAT PAGE
 # ==========================================
 def render_chat():
-    # Sidebar Navigation
-    with st.sidebar:
-        st.markdown("---")
-        if st.session_state.user_info:
-            if st.button(text('btn_back_dash'), use_container_width=True):
-                st.session_state.page_mode = "DASHBOARD"
-                st.rerun()
-        else:
-            if st.button(text('btn_exit_guest'), use_container_width=True):
-                st.session_state.page_mode = "LANDING"
-                st.rerun()
-                
-        st.markdown(f"### {text('sidebar_control')}")
-        
-        # ADMIN VIEW LOGIC
-        # Only show metrics to admins
-        current_email = st.session_state.user_info.email if st.session_state.user_info else ""
-        ADMIN_EMAILS = ["1037078681@qq.com", "linxuan1037078681@gmail.com"]
-        
-        if current_email in ADMIN_EMAILS:
+    render_top_controls(show_back=True)
+
+    current_email = st.session_state.user_info.email if st.session_state.user_info else ""
+    ADMIN_EMAILS = ["1037078681@qq.com", "linxuan1037078681@gmail.com"]
+    if current_email in ADMIN_EMAILS:
+        with st.expander(text('sidebar_control'), expanded=False):
             st.metric(text('metric_tokens'), st.session_state.total_cost_tokens)
-            
+
             if st.session_state.session_id:
                 st.caption(f"{text('status_saving')} (ID: ...{str(st.session_state.session_id)[-6:]})")
-            
+
             with st.expander(text('expander_state'), expanded=False):
                 st.json(st.session_state.json_state)
 
@@ -405,9 +382,6 @@ def render_chat():
                 data = json.dumps(payload, ensure_ascii=False, indent=2)
                 name = f"maia_diagnostic_{str(st.session_state.session_id)[:8] if st.session_state.session_id else 'no_session'}.json"
                 st.download_button("下载诊断包", data=data, file_name=name, mime="application/json")
-        else:
-            # For normal users, show nothing or minimal info
-            pass
 
         raw_analyst = st.session_state.get("last_analyst_raw_output") if hasattr(st, "session_state") else None
         if isinstance(raw_analyst, str) and raw_analyst.strip():
